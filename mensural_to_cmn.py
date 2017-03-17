@@ -46,6 +46,14 @@ def change_noterest_to_cmn(noterest):
 
     # 3. Get the CMN figure(s) that represent that value of minims (considering a minim equal to a CMN half note):
 
+    # undotted_soq_minim = [1, Fraction(1,2), Fraction(1,4), Fraction(1,8)]
+    # dotted_soq_minim = 1.5 * soq_minim
+    # soq_minim = undotted_soq_minim + dotted_soq_minim
+
+    # soq_minim.index(value_in_minims)
+
+    # Semibreves
+
     if value_in_minims == 2:
         # whole note
         attribute_dur.setValue('1')
@@ -56,6 +64,8 @@ def change_noterest_to_cmn(noterest):
         attribute_dur.setValue('1')
         noterest.addAttribute('dots', '1')
         cmn_voice.addChild(noterest)
+
+    # Breves
 
     elif value_in_minims == 4:
         # square note
@@ -94,7 +104,9 @@ def change_noterest_to_cmn(noterest):
         newnote.addAttribute('dur', '1')
         newnote.addAttribute('dots', '1')
         cmn_voice.addChild(newnote)
-        
+    
+    # Longs
+
     elif value_in_minims == 8:
         # long note
         attribute_dur.setValue('long')
@@ -172,6 +184,217 @@ def change_noterest_to_cmn(noterest):
         old_attributes = noterest.getAttributes()
         # Encoding the three times the two (dotted square and dotted whole) notes
         for i in [1,2,3]:
+            # First Note: dotted square note
+            newnote = MeiElement('note')
+            newnote.setId(xmlid + "_" + str(2*i-1))
+            newnote.setAttributes(old_attributes)
+            newnote.addAttribute('dur','breve')
+            newnote.addAttribute('dots','1')
+            cmn_voice.addChild(newnote)
+            # Second Note: dotted whole note
+            newnote = MeiElement('note')
+            newnote.setId(xmlid + "_" + str(2*i))
+            newnote.setAttributes(old_attributes)
+            newnote.addAttribute('dur','1')
+            newnote.addAttribute('dots','1')
+            cmn_voice.addChild(newnote)
+
+    # Maximas
+
+    elif value_in_minims == 16:
+        # 2 x (long note)
+        # Getting the xml:id and attributes from the mensural note
+        xmlid = noterest.getId()
+        noterest.removeAttribute('dur')
+        old_attributes = noterest.getAttributes()
+        for i in [1,2]:
+            newnote = MeiElement('note')
+            newnote.setId(xmlid + "_" + str(i))
+            newnote.setAttributes(old_attributes)
+            newnote.addAttribute('dur', 'long')
+            cmn_voice.addChild(newnote)
+
+    elif value_in_minims == 24:
+        # Two cases based on the default value of the breve (either of 9 or 6 minims -the case of 4 is not pertinent-)
+        if prolatio * tempus * modusminor == 8:
+            # 3 x (long note)
+            # Getting the xml:id and attributes from the mensural note
+            xmlid = noterest.getId()
+            noterest.removeAttribute('dur')
+            old_attributes = noterest.getAttributes()
+            for i in [1,2,3]:
+                newnote = MeiElement('note')
+                newnote.setId(xmlid + "_" + str(i))
+                newnote.setAttributes(old_attributes)
+                newnote.addAttribute('dur', 'long')
+                cmn_voice.addChild(newnote)
+        elif prolatio * tempus * modusminor == 12:
+            # 2 x (dotted long note)
+            # Getting the xml:id and attributes from the mensural note
+            xmlid = noterest.getId()
+            noterest.removeAttribute('dur')
+            old_attributes = noterest.getAttributes()
+            for i in [1,2]:
+                newnote = MeiElement('note')
+                newnote.setId(xmlid + "_" + str(i))
+                newnote.setAttributes(old_attributes)
+                newnote.addAttribute('dur', 'long')
+                noterest.addAttribute('dots', '1')
+                cmn_voice.addChild(newnote)
+        else:
+            # should not happen
+            pass
+
+    elif value_in_minims == 36:
+        # Two cases
+        if prolatio * tempus * modusminor == 12:
+            # 3 x (dotted long note)
+            # Getting the xml:id and attributes from the mensural note
+            xmlid = noterest.getId()
+            noterest.removeAttribute('dur')
+            old_attributes = noterest.getAttributes()
+            for i in [1,2,3]:
+                newnote = MeiElement('note')
+                newnote.setId(xmlid + "_" + str(i))
+                newnote.setAttributes(old_attributes)
+                newnote.addAttribute('dur', 'long')
+                noterest.addAttribute('dots', '1')
+                cmn_voice.addChild(newnote)
+        elif prolatio * tempus * modusminor == 18:
+            if prolatio * tempus == 6:
+                # 2 x (dotted long note + dotted square note)
+                # Getting the xml:id and attributes from the mensural note
+                xmlid = noterest.getId()
+                noterest.removeAttribute('dur')
+                old_attributes = noterest.getAttributes()
+                for i in [1,2]:
+                    # First Note: dotted long note
+                    newnote = MeiElement('note')
+                    newnote.setId(xmlid + "_" + str(2*i-1))
+                    newnote.setAttributes(old_attributes)
+                    newnote.addAttribute('dur','long')
+                    newnote.addAttribute('dots','1')
+                    cmn_voice.addChild(newnote)
+                    print(newnote)
+                    # Second Note: dotted square note
+                    newnote = MeiElement('note')
+                    newnote.setId(xmlid + "_" + str(2*i))
+                    newnote.setAttributes(old_attributes)
+                    newnote.addAttribute('dur','breve')
+                    newnote.addAttribute('dots','1')
+                    cmn_voice.addChild(newnote)
+            elif prolatio * tempus == 9:
+                # 2 x (2 x (dotted square note + dotted whole note)) = 4 x (dotted square note + dotted whole note)
+                # Getting the xml:id and attributes from the mensural note
+                xmlid = noterest.getId()
+                noterest.removeAttribute('dur')
+                old_attributes = noterest.getAttributes()
+                # Encoding the two times the two (dotted square and dotted whole) notes
+                for i in [1,2,3,4]:
+                    # First Note: dotted square note
+                    newnote = MeiElement('note')
+                    newnote.setId(xmlid + "_" + str(2*i-1))
+                    newnote.setAttributes(old_attributes)
+                    newnote.addAttribute('dur','breve')
+                    newnote.addAttribute('dots','1')
+                    cmn_voice.addChild(newnote)
+                    # Second Note: dotted whole note
+                    newnote = MeiElement('note')
+                    newnote.setId(xmlid + "_" + str(2*i))
+                    newnote.setAttributes(old_attributes)
+                    newnote.addAttribute('dur','1')
+                    newnote.addAttribute('dots','1')
+                    cmn_voice.addChild(newnote)
+            else:
+                # should not happen
+                pass
+        else:
+            # should not happen
+            pass
+
+    elif value_in_minims == 54:
+        if prolatio * tempus * modusminor == 18:
+            if prolatio * tempus == 6:
+                # 3 x (dotted long note + dotted square note)
+                # Getting the xml:id and attributes from the mensural note
+                xmlid = noterest.getId()
+                noterest.removeAttribute('dur')
+                old_attributes = noterest.getAttributes()
+                for i in [1,2,3]:
+                    # First Note: dotted long note
+                    newnote = MeiElement('note')
+                    newnote.setId(xmlid + "_" + str(2*i-1))
+                    newnote.setAttributes(old_attributes)
+                    newnote.addAttribute('dur','long')
+                    newnote.addAttribute('dots','1')
+                    cmn_voice.addChild(newnote)
+                    print(newnote)
+                    # Second Note: dotted square note
+                    newnote = MeiElement('note')
+                    newnote.setId(xmlid + "_" + str(2*i))
+                    newnote.setAttributes(old_attributes)
+                    newnote.addAttribute('dur','breve')
+                    newnote.addAttribute('dots','1')
+                    cmn_voice.addChild(newnote)
+            elif prolatio * tempus == 9:
+                # 3 x (2 x (dotted square note + dotted whole note)) = 6 x (dotted square note + dotted whole note)
+                # Getting the xml:id and attributes from the mensural note
+                xmlid = noterest.getId()
+                noterest.removeAttribute('dur')
+                old_attributes = noterest.getAttributes()
+                # Encoding the two times the two (dotted square and dotted whole) notes
+                for i in [1,2,3,4,5,6]:
+                    # First Note: dotted square note
+                    newnote = MeiElement('note')
+                    newnote.setId(xmlid + "_" + str(2*i-1))
+                    newnote.setAttributes(old_attributes)
+                    newnote.addAttribute('dur','breve')
+                    newnote.addAttribute('dots','1')
+                    cmn_voice.addChild(newnote)
+                    # Second Note: dotted whole note
+                    newnote = MeiElement('note')
+                    newnote.setId(xmlid + "_" + str(2*i))
+                    newnote.setAttributes(old_attributes)
+                    newnote.addAttribute('dur','1')
+                    newnote.addAttribute('dots','1')
+                    cmn_voice.addChild(newnote)
+            else:
+                # should not happen
+                pass
+        elif prolatio * tempus * modusminor == 27:
+            # 2 x (3 x (dotted square note + dotted whole note)) = 6 x (dotted square note + dotted whole note)            
+            # Getting the xml:id and attributes from the mensural note
+            xmlid = noterest.getId()
+            noterest.removeAttribute('dur')
+            old_attributes = noterest.getAttributes()
+            # Encoding the three times the two (dotted square and dotted whole) notes
+            for i in [1,2,3,4,5,6]:
+                # First Note: dotted square note
+                newnote = MeiElement('note')
+                newnote.setId(xmlid + "_" + str(2*i-1))
+                newnote.setAttributes(old_attributes)
+                newnote.addAttribute('dur','breve')
+                newnote.addAttribute('dots','1')
+                cmn_voice.addChild(newnote)
+                # Second Note: dotted whole note
+                newnote = MeiElement('note')
+                newnote.setId(xmlid + "_" + str(2*i))
+                newnote.setAttributes(old_attributes)
+                newnote.addAttribute('dur','1')
+                newnote.addAttribute('dots','1')
+                cmn_voice.addChild(newnote)
+        else:
+            # should not happen
+            pass
+
+    elif value_in_minims == 81:
+        # 3 x (3 x (dotted square note + dotted whole note)) = 9 x (dotted square note + dotted whole note)            
+        # Getting the xml:id and attributes from the mensural note
+        xmlid = noterest.getId()
+        noterest.removeAttribute('dur')
+        old_attributes = noterest.getAttributes()
+        # Encoding the three times the two (dotted square and dotted whole) notes
+        for i in [1,2,3,4,5,6,7,8,9]:
             # First Note: dotted square note
             newnote = MeiElement('note')
             newnote.setId(xmlid + "_" + str(2*i-1))
