@@ -239,7 +239,7 @@ def change_noterest_to_cmn(noterest):
                 newnote.setId(xmlid + "_" + str(i))
                 newnote.setAttributes(old_attributes)
                 newnote.addAttribute('dur', 'long')
-                noterest.addAttribute('dots', '1')
+                newnote.addAttribute('dots', '1')
                 cmn_voice.addChild(newnote)
         else:
             # should not happen
@@ -258,7 +258,7 @@ def change_noterest_to_cmn(noterest):
                 newnote.setId(xmlid + "_" + str(i))
                 newnote.setAttributes(old_attributes)
                 newnote.addAttribute('dur', 'long')
-                noterest.addAttribute('dots', '1')
+                newnote.addAttribute('dots', '1')
                 cmn_voice.addChild(newnote)
         elif prolatio * tempus * modusminor == 18:
             if prolatio * tempus == 6:
