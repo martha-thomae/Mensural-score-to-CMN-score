@@ -5,36 +5,63 @@ from pymei import *
 
 # Simple figures
 
-def whole_note():
+def whole_note(attribute_dur, noterest):
     attribute_dur.setValue('1')
     cmn_voice.addChild(noterest)
 
-def dotted_whole_note():
+def dotted_whole_note(attribute_dur, noterest):
     attribute_dur.setValue('1')
     noterest.addAttribute('dots', '1')
     cmn_voice.addChild(noterest)
 
-def square_note():
+def square_note(attribute_dur, noterest):
     attribute_dur.setValue('breve')
     cmn_voice.addChild(noterest)
 
-def dotted_square_note():
+def dotted_square_note(attribute_dur, noterest):
     attribute_dur.setValue('breve')
     noterest.addAttribute('dots', '1')
     cmn_voice.addChild(noterest)
 
-def long_note():
-    attribute_dur.setValue('long')
-    cmn_voice.addChild(noterest)
+# Simple / Compound figures (depending on the 'times' parameter)
 
-def dotted_long_note():
-    attribute_dur.setValue('long')
-    noterest.addAttribute('dots', '1')
-    cmn_voice.addChild(noterest)
+def long_note(times, attribute_dur, noterest):
+    if times == 1:
+        attribute_dur.setValue('long')
+        cmn_voice.addChild(noterest)
+    else:
+        # Getting the xml:id and attributes from the mensural note
+        xmlid = noterest.getId()
+        noterest.removeAttribute('dur')
+        old_attributes = noterest.getAttributes()
+        for i in range(1, times+1):
+            newnote = MeiElement('note')
+            newnote.setId(xmlid + "_" + str(i))
+            newnote.setAttributes(old_attributes)
+            newnote.addAttribute('dur', 'long')
+            cmn_voice.addChild(newnote)
+
+def dotted_long_note(times, attribute_dur, noterest):
+    if times == 1:
+        attribute_dur.setValue('long')
+        noterest.addAttribute('dots', '1')
+        cmn_voice.addChild(noterest)
+    else:
+        # Getting the xml:id and attributes from the mensural note
+        xmlid = noterest.getId()
+        noterest.removeAttribute('dur')
+        old_attributes = noterest.getAttributes()
+        for i in range(1, times+1):
+            newnote = MeiElement('note')
+            newnote.setId(xmlid + "_" + str(i))
+            newnote.setAttributes(old_attributes)
+            newnote.addAttribute('dur', 'long')
+            newnote.addAttribute('dots', '1')
+            cmn_voice.addChild(newnote)
 
 # Compound figures
 
-def dotted_square_note_AND_dotted_whole_note(times):
+def dotted_square_note_AND_dotted_whole_note(times, noterest):
     # dotted square note + dotted whole note
     # Getting the xml:id and attributes from the mensural note
     xmlid = noterest.getId()
@@ -56,7 +83,7 @@ def dotted_square_note_AND_dotted_whole_note(times):
         newnote.addAttribute('dots', '1')
         cmn_voice.addChild(newnote)
 
-def dotted_long_note_AND_dotted_square_note (times):
+def dotted_long_note_AND_dotted_square_note (times, noterest):
     # dotted long note + dotted square note
     # Getting the xml:id and attributes from the mensural note
     xmlid = noterest.getId()
@@ -78,77 +105,48 @@ def dotted_long_note_AND_dotted_square_note (times):
         newnote.addAttribute('dots','1')
         cmn_voice.addChild(newnote)
 
-def long_note(times):
-    if times == 1:
-        long_note()
-    else:
-        # Getting the xml:id and attributes from the mensural note
-        xmlid = noterest.getId()
-        noterest.removeAttribute('dur')
-        old_attributes = noterest.getAttributes()
-        for i in range(1, times+1):
-            newnote = MeiElement('note')
-            newnote.setId(xmlid + "_" + str(i))
-            newnote.setAttributes(old_attributes)
-            newnote.addAttribute('dur', 'long')
-            cmn_voice.addChild(newnote)
+# Complex cases of compound figures
 
-def dotted_long_note(times):
-    if times == 1:
-        dotted_long_note()
-    else:
-        # Getting the xml:id and attributes from the mensural note
-        xmlid = noterest.getId()
-        noterest.removeAttribute('dur')
-        old_attributes = noterest.getAttributes()
-        for i in range(1, times+1):
-            newnote = MeiElement('note')
-            newnote.setId(xmlid + "_" + str(i))
-            newnote.setAttributes(old_attributes)
-            newnote.addAttribute('dur', 'long')
-            newnote.addAttribute('dots', '1')
-            cmn_voice.addChild(newnote)
-
-def eighteenth_minims_case(breve_default_value):
+def eighteenth_minims_case(breve_default_value, noterest):
     print(18)
     # Two cases based on the default value of the breve (either of 9 or 6 minims -the case of 4 is not pertinent-)
     if breve_default_value == 6:
         # dotted long note + dotted square note
-        dotted_long_note_AND_dotted_square_note(1)
+        dotted_long_note_AND_dotted_square_note(1, noterest)
     elif breve_default_value == 9:
         # 2 x (dotted square note + dotted whole note)
-        dotted_square_note_AND_dotted_whole_note(2)
+        dotted_square_note_AND_dotted_whole_note(2, noterest)
     else:
         # should not happen
         print("MISTAKE! 18 minims and the default number of minims in the breve isn't 6 nor 9 (i.e., mensuration isn't any of [3,2], [2,3], or [3,3])")
 
-def twentyfour_minims_case(longa_default_value):
+def twentyfour_minims_case(longa_default_value, attribute_dur, noterest):
     print(24)
     # Two cases based on the default value of the breve (either of 8 or 12 minims)
     if longa_default_value == 8:
         # 3 x (long note)
-        long_note(3)
+        long_note(3, attribute_dur, noterest)
     elif longa_default_value == 12:
         # 2 x (dotted long note)
-        dotted_long_note(2)
+        dotted_long_note(2, attribute_dur, noterest)
     else:
         # should not happen
         print("MISTAKE! 24 minims and the default number of minims in the long isn't 8 nor 12.")
 
-def thirtysix_minims_case():
+def thirtysix_minims_case(longa_default_value, breve_default_value, attribute_dur, noterest):
     print(36)
     # Two cases
     if longa_default_value == 12:
         # 3 x (dotted long note)
-        dotted_long_note(3)
+        dotted_long_note(3, attribute_dur, noterest)
     elif longa_default_value == 18:
         # Another two cases
-        if prolatio * tempus == 6:
+        if breve_default_value == 6:
             # 2 x (dotted long note + dotted square note)
-            dotted_long_note_AND_dotted_square_note(2)
-        elif prolatio * tempus == 9:
+            dotted_long_note_AND_dotted_square_note(2, noterest)
+        elif breve_default_value == 9:
             # 2 x (2 x (dotted square note + dotted whole note)) = 4 x (dotted square note + dotted whole note)
-            dotted_square_note_AND_dotted_whole_note(4)
+            dotted_square_note_AND_dotted_whole_note(4, noterest)
         else:
             # should not happen
             print("MISTAKE! In the 36 minims, the breve default value isn't neither 6 nor 9")
@@ -156,23 +154,23 @@ def thirtysix_minims_case():
         # should not happen
         print("MISTAKE! In the 36 minims, the long default value isn't neither 12 nor 18")
 
-def fiftyfour_minims_case(longa_default_value):
+def fiftyfour_minims_case(longa_default_value, breve_default_value, noterest):
     print(54)
     # Two cases
     if longa_default_value == 18:
         # Another two cases
-        if prolatio * tempus == 6:
+        if breve_default_value == 6:
             # 3 x (dotted long note + dotted square note)
-            dotted_long_note_AND_dotted_square_note(3)
-        elif prolatio * tempus == 9:
+            dotted_long_note_AND_dotted_square_note(3, noterest)
+        elif breve_default_value == 9:
             # 3 x (2 x (dotted square note + dotted whole note)) = 6 x (dotted square note + dotted whole note)
-            dotted_long_note_AND_dotted_square_note(6)
+            dotted_long_note_AND_dotted_square_note(6, noterest)
         else:
             # should not happen
             print("MISTAKE! In the 54 minims, the breve default value isn't neither 6 nor 9.")
     elif longa_default_value == 27:
         # 2 x (3 x (dotted square note + dotted whole note)) = 6 x (dotted square note + dotted whole note)
-        dotted_square_note_AND_dotted_whole_note(6)
+        dotted_square_note_AND_dotted_whole_note(6, noterest)
     else:
         # should not happen
         print("MISTAKE! In the 54 minims, the long default value isn't neither 18 nor 27.")
@@ -222,20 +220,20 @@ def change_noterest_to_cmn(noterest):
 
     # At the moment, only semibreves, breves, longs, and maximas are considered (still missing everything smaller or equal than the minim)
     cmn_notes = {
-        2: whole_note(),
-        3: dotted_whole_note(),
-        4: square_note(),
-        6: dotted_square_note(),
-        9: dotted_square_note_AND_dotted_whole_note(1),
-        8: long_note(),
-        12: dotted_long_note(),
-        18: eighteenth_minims_case(prolatio * tempus),
-        27: dotted_square_note_AND_dotted_whole_note(3)
-        16: long_note(2)
-        24: twentyfour_minims_case(prolatio * tempus * modusminor),
-        36: thirtysix_minims_case(prolatio * tempus * modusminor),
-        54: fiftyfour_minims_case(prolatio * tempus * modusminor),
-        81: dotted_square_note_AND_dotted_whole_note(9)
+        2: whole_note(attribute_dur, noterest),
+        3: dotted_whole_note(attribute_dur, noterest),
+        4: square_note(attribute_dur, noterest),
+        6: dotted_square_note(attribute_dur, noterest),
+        9: dotted_square_note_AND_dotted_whole_note(1, noterest),
+        8: long_note(1, attribute_dur, noterest),
+        12: dotted_long_note(1, attribute_dur, noterest),
+        18: eighteenth_minims_case(prolatio * tempus, noterest),
+        27: dotted_square_note_AND_dotted_whole_note(3, noterest),
+        16: long_note(2, attribute_dur, noterest),
+        24: twentyfour_minims_case(prolatio * tempus * modusminor, attribute_dur, noterest),
+        36: thirtysix_minims_case(prolatio * tempus * modusminor, prolatio * tempus, attribute_dur, noterest),
+        54: fiftyfour_minims_case(prolatio * tempus * modusminor, prolatio * tempus, noterest),
+        81: dotted_square_note_AND_dotted_whole_note(9, noterest)
     }
 
     cmn_notes[value_in_minims]
