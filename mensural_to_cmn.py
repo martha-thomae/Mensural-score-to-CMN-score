@@ -4,21 +4,62 @@ import argparse
 from pymei import *
 
 # Simple figures
+def sixteenth_note(attribute_dur, noterest):
+    print("sixteenth note")
+    attribute_dur.setValue('16')
+    cmn_voice.addChild(noterest)
+
+def eighth_note(attribute_dur, noterest):
+    print("eighth note")
+    attribute_dur.setValue('8')
+    cmn_voice.addChild(noterest)
+
+def dotted_eighth_note(attribute_dur, noterest):
+    print("dotted eighth note")
+    attribute_dur.setValue('8')
+    noterest.addAttribute('dots', '1')
+    cmn_voice.addChild(noterest)
+
+def quarter_note(attribute_dur, noterest):
+    print("quarter note")
+    attribute_dur.setValue('4')
+    cmn_voice.addChild(noterest)
+
+def dotted_quarter_note(attribute_dur, noterest):
+    print("dotted quarter note")
+    attribute_dur.setValue('4')
+    noterest.addAttribute('dots', '1')
+    cmn_voice.addChild(noterest)
+
+def half_note(attribute_dur, noterest):
+    print("half note")
+    attribute_dur.setValue('2')
+    cmn_voice.addChild(noterest)
+
+def dotted_half_note(attribute_dur, noterest):
+    print("dotted half note")
+    attribute_dur.setValue('2')
+    noterest.addAttribute('dots', '1')
+    cmn_voice.addChild(noterest)
 
 def whole_note(attribute_dur, noterest):
+    print("whole note")
     attribute_dur.setValue('1')
     cmn_voice.addChild(noterest)
 
 def dotted_whole_note(attribute_dur, noterest):
+    print("dotted whole note")
     attribute_dur.setValue('1')
     noterest.addAttribute('dots', '1')
     cmn_voice.addChild(noterest)
 
 def square_note(attribute_dur, noterest):
+    print("square note")
     attribute_dur.setValue('breve')
     cmn_voice.addChild(noterest)
 
 def dotted_square_note(attribute_dur, noterest):
+    print("dotted square note")
     attribute_dur.setValue('breve')
     noterest.addAttribute('dots', '1')
     cmn_voice.addChild(noterest)
@@ -26,6 +67,7 @@ def dotted_square_note(attribute_dur, noterest):
 # Simple / Compound figures (depending on the 'times' parameter)
 
 def long_note(times, attribute_dur, noterest):
+    print("long note * " + str(times))
     if times == 1:
         attribute_dur.setValue('long')
         cmn_voice.addChild(noterest)
@@ -35,13 +77,14 @@ def long_note(times, attribute_dur, noterest):
         noterest.removeAttribute('dur')
         old_attributes = noterest.getAttributes()
         for i in range(1, times+1):
-            newnote = MeiElement('note')
+            newnote = MeiElement(noterest.name)
             newnote.setId(xmlid + "_" + str(i))
             newnote.setAttributes(old_attributes)
             newnote.addAttribute('dur', 'long')
             cmn_voice.addChild(newnote)
 
 def dotted_long_note(times, attribute_dur, noterest):
+    print("dotted long note * " + str(times))
     if times == 1:
         attribute_dur.setValue('long')
         noterest.addAttribute('dots', '1')
@@ -52,7 +95,7 @@ def dotted_long_note(times, attribute_dur, noterest):
         noterest.removeAttribute('dur')
         old_attributes = noterest.getAttributes()
         for i in range(1, times+1):
-            newnote = MeiElement('note')
+            newnote = MeiElement(noterest.name)
             newnote.setId(xmlid + "_" + str(i))
             newnote.setAttributes(old_attributes)
             newnote.addAttribute('dur', 'long')
@@ -62,6 +105,7 @@ def dotted_long_note(times, attribute_dur, noterest):
 # Compound figures
 
 def dotted_square_note_AND_dotted_whole_note(times, noterest):
+    print("( dotted square note + dotted whole note ) * " + str(times))
     # dotted square note + dotted whole note
     # Getting the xml:id and attributes from the mensural note
     xmlid = noterest.getId()
@@ -69,14 +113,14 @@ def dotted_square_note_AND_dotted_whole_note(times, noterest):
     old_attributes = noterest.getAttributes()
     for i in range (1, times + 1):
         # First Note: dotted square note
-        newnote = MeiElement('note')
+        newnote = MeiElement(noterest.name)
         newnote.setId(xmlid + "_" + str(2*i - 1))
         newnote.setAttributes(old_attributes)
         newnote.addAttribute('dur', 'breve')
         newnote.addAttribute('dots', '1')
         cmn_voice.addChild(newnote)
         # Second Note: dotted whole note
-        newnote = MeiElement('note')
+        newnote = MeiElement(noterest.name)
         newnote.setId(xmlid + "_" + str(2*i))
         newnote.setAttributes(old_attributes)
         newnote.addAttribute('dur', '1')
@@ -84,6 +128,7 @@ def dotted_square_note_AND_dotted_whole_note(times, noterest):
         cmn_voice.addChild(newnote)
 
 def dotted_long_note_AND_dotted_square_note (times, noterest):
+    print("( dotted long note + dotted square note ) * " + str(times))
     # dotted long note + dotted square note
     # Getting the xml:id and attributes from the mensural note
     xmlid = noterest.getId()
@@ -91,21 +136,21 @@ def dotted_long_note_AND_dotted_square_note (times, noterest):
     old_attributes = noterest.getAttributes()
     for i in range(1, times + 1):
         # First Note: dotted long note
-        newnote = MeiElement('note')
+        newnote = MeiElement(noterest.name)
         newnote.setId(xmlid + "_" + str(2*i - 1))
         newnote.setAttributes(old_attributes)
         newnote.addAttribute('dur','long')
         newnote.addAttribute('dots','1')
         cmn_voice.addChild(newnote)
         # Second Note: dotted square note
-        newnote = MeiElement('note')
+        newnote = MeiElement(noterest.name)
         newnote.setId(xmlid + "_" + str(2*i))
         newnote.setAttributes(old_attributes)
         newnote.addAttribute('dur','breve')
         newnote.addAttribute('dots','1')
         cmn_voice.addChild(newnote)
 
-# Complex cases of compound figures
+# Complex cases of compound figures (more than one option to choose from)
 
 def eighteenth_minims_case(breve_default_value, noterest):
     print(18)
@@ -218,33 +263,57 @@ def change_noterest_to_cmn(noterest):
 
     # 3. Get the CMN figure(s) that represent that value of minims (considering a minim equal to a CMN half note):
 
-    # At the moment, only semibreves, breves, longs, and maximas are considered (still missing everything smaller or equal than the minim)
-    cmn_notes = {
-        2: whole_note(attribute_dur, noterest),
-        3: dotted_whole_note(attribute_dur, noterest),
-        4: square_note(attribute_dur, noterest),
-        6: dotted_square_note(attribute_dur, noterest),
-        9: dotted_square_note_AND_dotted_whole_note(1, noterest),
-        8: long_note(1, attribute_dur, noterest),
-        12: dotted_long_note(1, attribute_dur, noterest),
-        18: eighteenth_minims_case(prolatio * tempus, noterest),
-        27: dotted_square_note_AND_dotted_whole_note(3, noterest),
-        16: long_note(2, attribute_dur, noterest),
-        24: twentyfour_minims_case(prolatio * tempus * modusminor, attribute_dur, noterest),
-        36: thirtysix_minims_case(prolatio * tempus * modusminor, prolatio * tempus, attribute_dur, noterest),
-        54: fiftyfour_minims_case(prolatio * tempus * modusminor, prolatio * tempus, noterest),
-        81: dotted_square_note_AND_dotted_whole_note(9, noterest)
-    }
+    # Semibreves, breves, longs, and maximas
+    if value_in_minims == 2:
+        whole_note(attribute_dur, noterest)
+    elif value_in_minims == 3:
+        dotted_whole_note(attribute_dur, noterest)
+    elif value_in_minims == 4:
+        square_note(attribute_dur, noterest)
+    elif value_in_minims == 6:
+        dotted_square_note(attribute_dur, noterest)
+    elif value_in_minims == 9:
+        dotted_square_note_AND_dotted_whole_note(1, noterest)
+    elif value_in_minims == 8:
+        long_note(1, attribute_dur, noterest)
+    elif value_in_minims == 12:
+        dotted_long_note(1, attribute_dur, noterest)
+    elif value_in_minims == 18:
+        eighteenth_minims_case(prolatio * tempus, noterest)
+    elif value_in_minims == 27:
+        dotted_square_note_AND_dotted_whole_note(3, noterest)
+    elif value_in_minims == 16:
+        long_note(2, attribute_dur, noterest)
+    elif value_in_minims == 24:
+        twentyfour_minims_case(prolatio * tempus * modusminor, attribute_dur, noterest)
+    elif value_in_minims == 36:
+        thirtysix_minims_case(prolatio * tempus * modusminor, prolatio * tempus, attribute_dur, noterest)
+    elif value_in_minims == 54:
+        fiftyfour_minims_case(prolatio * tempus * modusminor, prolatio * tempus, noterest)
+    elif value_in_minims == 81:
+        dotted_square_note_AND_dotted_whole_note(9, noterest)
+    # Minims or below
+    elif value_in_minims == 1:
+        half_note(attribute_dur, noterest)
+    elif value_in_minims == Fraction(1,2):
+        quarter_note(attribute_dur, noterest)
+    elif value_in_minims == Fraction(1,4):
+        eighth_note(attribute_dur, noterest)
+    elif value_in_minims == Fraction(1,8):
+        sixteenth_note(attribute_dur, noterest)
+    # Dotted (minims or below)
+    elif value_in_minims == Fraction(3,2):
+        dotted_half_note(attribute_dur, noterest)
+    elif value_in_minims == Fraction(3,4):
+        dotted_quarter_note(attribute_dur, noterest)
+    elif value_in_minims == Fraction(3,8):
+        dotted_eighth_note(attribute_dur, noterest)
+    # Else?
+    else:
+        print("mistake?")
 
-    cmn_notes[value_in_minims]
-
-    # ... still missing notes smaller or equal to the minim...
-    # undotted_soq_minim = [1, Fraction(1,2), Fraction(1,4), Fraction(1,8)]
-    # dotted_soq_minim = 1.5 * soq_minim
-    # soq_minim = undotted_soq_minim + dotted_soq_minim
-
-    # soq_minim.index(value_in_minims)
-
+# Main part of the program, it takes the input and output file paths given by the user, 
+# and transform each of the notes and rests in the input file to the corresponding cmn values and saves them in the output file
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="This program takes a Mensural MEI file as input and converts it into a CMN MEI file.")
     parser.add_argument('input_file', help="Path of the Mensural MEI file to be converted into CMN. This Mensural MEI should encode the precise duration of each note of the mensural piece (i.e., it encodes both the note shape in @dur and the 'perfect'/'imperfect'/'altered' quality of the note in @num and @numbase).")
@@ -254,34 +323,36 @@ if __name__ == "__main__":
     # Mensural MEI input file
     mensural_meidoc = documentFromFile(args.input_file).getMeiDocument()
     layers = mensural_meidoc.getElementsByName('layer')
-    stavesDef = mensural_meidoc.getElementsByName('staffDef')
 
     # The MEI document that will save the CMN MEI output file
     cmn_meidoc = documentFromFile(args.input_file).getMeiDocument()
     cmnlayers = cmn_meidoc.getElementsByName('layer')
+    cmnStavesDef = cmn_meidoc.getElementsByName('staffDef')
     for layer in cmnlayers:
         layer.deleteAllChildren()
 
-    for i in range(0, len(stavesDef)):
+    # Processing the elements on each staff
+    for i in range(0, len(cmnStavesDef)):
         mensural_voice = layers[i]
-        staffdef = stavesDef[i]
+        staffdef = cmnStavesDef[i]
         prolatio = int(staffdef.getAttribute('prolatio').value)
         tempus = int(staffdef.getAttribute('tempus').value)
         modusminor = int(staffdef.getAttribute('modusminor').value)
-        
-        #modusmaior = int(staffdef.getAttribute('modusmaior').value)
+        modusmaior = int(staffdef.getAttribute('modusmaior').value)
 
-        #staffdef.removeAttribute('modusmaior')
+        staffdef.removeAttribute('modusmaior')
         staffdef.removeAttribute('modusminor')
         staffdef.removeAttribute('tempus')
         staffdef.removeAttribute('prolatio')
 
         cmn_voice = cmnlayers[i]
 
+        # Processing each element in the staff
         for child in mensural_voice.getChildren():
-
+            # Processing each note / rest in the staff
             if child.name == "note" or child.name == "rest":
                 change_noterest_to_cmn(child)
+            # Other elements are just copied as it
             else:
                 cmn_voice.addChild(child)
 
