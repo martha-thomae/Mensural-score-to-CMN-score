@@ -66,7 +66,7 @@ def dotted_square_note(attribute_dur, noterest):
 
 # Simple / Compound figures (depending on the 'times' parameter)
 
-def long_note(times, attribute_dur, noterest):
+def long_note(times, attribute_dur, noterest, tie_list):
     print("long note * " + str(times))
     if times == 1:
         attribute_dur.setValue('long')
@@ -82,8 +82,14 @@ def long_note(times, attribute_dur, noterest):
             newnote.setAttributes(old_attributes)
             newnote.addAttribute('dur', 'long')
             cmn_voice.addChild(newnote)
+            # Ties: between units
+            if times > 1 and i < times:
+                interunits_tie = MeiElement('tie')
+                interunits_tie.addAttribute('startid', '#' + xmlid + "_" + str(i))
+                interunits_tie.addAttribute('endid', '#' + xmlid + "_" + str(i + 1))
+                tie_list.append(interunits_tie)
 
-def dotted_long_note(times, attribute_dur, noterest):
+def dotted_long_note(times, attribute_dur, noterest, tie_list):
     print("dotted long note * " + str(times))
     if times == 1:
         attribute_dur.setValue('long')
@@ -101,10 +107,16 @@ def dotted_long_note(times, attribute_dur, noterest):
             newnote.addAttribute('dur', 'long')
             newnote.addAttribute('dots', '1')
             cmn_voice.addChild(newnote)
+            # Ties: between units
+            if times > 1 and i < times:
+                interunits_tie = MeiElement('tie')
+                interunits_tie.addAttribute('startid', '#' + xmlid + "_" + str(i))
+                interunits_tie.addAttribute('endid', '#' + xmlid + "_" + str(i + 1))
+                tie_list.append(interunits_tie)
 
 # Compound figures
 
-def dotted_square_note_AND_dotted_whole_note(times, noterest):
+def dotted_square_note_AND_dotted_whole_note(times, noterest, tie_list):
     print("( dotted square note + dotted whole note ) * " + str(times))
     # dotted square note + dotted whole note
     # Getting the xml:id and attributes from the mensural note
@@ -126,8 +138,20 @@ def dotted_square_note_AND_dotted_whole_note(times, noterest):
         newnote.addAttribute('dur', '1')
         newnote.addAttribute('dots', '1')
         cmn_voice.addChild(newnote)
+        # Ties
+        # For the compound unit (i.e., for the 'dotted square note + dotted whole note')
+        intraunit_tie = MeiElement('tie')
+        intraunit_tie.addAttribute('startid', '#' + xmlid + "_" + str(2*i - 1))
+        intraunit_tie.addAttribute('endid', '#' + xmlid + "_" + str(2*i))
+        tie_list.append(intraunit_tie)
+        # Between the compound units
+        if times > 1 and i < times:
+            interunits_tie = MeiElement('tie')
+            interunits_tie.addAttribute('startid', '#' + xmlid + "_" + str(2*i))
+            interunits_tie.addAttribute('endid', '#' + xmlid + "_" + str(2*i + 1))
+            tie_list.append(interunits_tie)
 
-def dotted_long_note_AND_dotted_square_note (times, noterest):
+def dotted_long_note_AND_dotted_square_note (times, noterest, tie_list):
     print("( dotted long note + dotted square note ) * " + str(times))
     # dotted long note + dotted square note
     # Getting the xml:id and attributes from the mensural note
@@ -149,49 +173,61 @@ def dotted_long_note_AND_dotted_square_note (times, noterest):
         newnote.addAttribute('dur','breve')
         newnote.addAttribute('dots','1')
         cmn_voice.addChild(newnote)
+        # Ties
+        # For the compound unit (i.e., for the 'dotted square note + dotted whole note')
+        intraunit_tie = MeiElement('tie')
+        intraunit_tie.addAttribute('startid', '#' + xmlid + "_" + str(2*i - 1))
+        intraunit_tie.addAttribute('endid', '#' + xmlid + "_" + str(2*i))
+        tie_list.append(intraunit_tie)
+        # Between the compound units
+        if times > 1 and i < times:
+            interunits_tie = MeiElement('tie')
+            interunits_tie.addAttribute('startid', '#' + xmlid + "_" + str(2*i))
+            interunits_tie.addAttribute('endid', '#' + xmlid + "_" + str(2*i + 1))
+            tie_list.append(interunits_tie)
 
 # Complex cases of compound figures (more than one option to choose from)
 
-def eighteenth_minims_case(breve_default_value, noterest):
+def eighteenth_minims_case(breve_default_value, noterest, tie_list):
     print(18)
     # Two cases based on the default value of the breve (either of 9 or 6 minims -the case of 4 is not pertinent-)
     if breve_default_value == 6:
         # dotted long note + dotted square note
-        dotted_long_note_AND_dotted_square_note(1, noterest)
+        dotted_long_note_AND_dotted_square_note(1, noterest, tie_list)
     elif breve_default_value == 9:
         # 2 x (dotted square note + dotted whole note)
-        dotted_square_note_AND_dotted_whole_note(2, noterest)
+        dotted_square_note_AND_dotted_whole_note(2, noterest, tie_list)
     else:
         # should not happen
         print("MISTAKE! 18 minims and the default number of minims in the breve isn't 6 nor 9 (i.e., mensuration isn't any of [3,2], [2,3], or [3,3])")
 
-def twentyfour_minims_case(longa_default_value, attribute_dur, noterest):
+def twentyfour_minims_case(longa_default_value, attribute_dur, noterest, tie_list):
     print(24)
     # Two cases based on the default value of the breve (either of 8 or 12 minims)
     if longa_default_value == 8:
         # 3 x (long note)
-        long_note(3, attribute_dur, noterest)
+        long_note(3, attribute_dur, noterest, tie_list)
     elif longa_default_value == 12:
         # 2 x (dotted long note)
-        dotted_long_note(2, attribute_dur, noterest)
+        dotted_long_note(2, attribute_dur, noterest, tie_list)
     else:
         # should not happen
         print("MISTAKE! 24 minims and the default number of minims in the long isn't 8 nor 12.")
 
-def thirtysix_minims_case(longa_default_value, breve_default_value, attribute_dur, noterest):
+def thirtysix_minims_case(longa_default_value, breve_default_value, attribute_dur, noterest, tie_list):
     print(36)
     # Two cases
     if longa_default_value == 12:
         # 3 x (dotted long note)
-        dotted_long_note(3, attribute_dur, noterest)
+        dotted_long_note(3, attribute_dur, noterest, tie_list)
     elif longa_default_value == 18:
         # Another two cases
         if breve_default_value == 6:
             # 2 x (dotted long note + dotted square note)
-            dotted_long_note_AND_dotted_square_note(2, noterest)
+            dotted_long_note_AND_dotted_square_note(2, noterest, tie_list)
         elif breve_default_value == 9:
             # 2 x (2 x (dotted square note + dotted whole note)) = 4 x (dotted square note + dotted whole note)
-            dotted_square_note_AND_dotted_whole_note(4, noterest)
+            dotted_square_note_AND_dotted_whole_note(4, noterest, tie_list)
         else:
             # should not happen
             print("MISTAKE! In the 36 minims, the breve default value isn't neither 6 nor 9")
@@ -199,30 +235,30 @@ def thirtysix_minims_case(longa_default_value, breve_default_value, attribute_du
         # should not happen
         print("MISTAKE! In the 36 minims, the long default value isn't neither 12 nor 18")
 
-def fiftyfour_minims_case(longa_default_value, breve_default_value, noterest):
+def fiftyfour_minims_case(longa_default_value, breve_default_value, noterest, tie_list):
     print(54)
     # Two cases
     if longa_default_value == 18:
         # Another two cases
         if breve_default_value == 6:
             # 3 x (dotted long note + dotted square note)
-            dotted_long_note_AND_dotted_square_note(3, noterest)
+            dotted_long_note_AND_dotted_square_note(3, noterest, tie_list)
         elif breve_default_value == 9:
             # 3 x (2 x (dotted square note + dotted whole note)) = 6 x (dotted square note + dotted whole note)
-            dotted_long_note_AND_dotted_square_note(6, noterest)
+            dotted_long_note_AND_dotted_square_note(6, noterest, tie_list)
         else:
             # should not happen
             print("MISTAKE! In the 54 minims, the breve default value isn't neither 6 nor 9.")
     elif longa_default_value == 27:
         # 2 x (3 x (dotted square note + dotted whole note)) = 6 x (dotted square note + dotted whole note)
-        dotted_square_note_AND_dotted_whole_note(6, noterest)
+        dotted_square_note_AND_dotted_whole_note(6, noterest, tie_list)
     else:
         # should not happen
         print("MISTAKE! In the 54 minims, the long default value isn't neither 18 nor 27.")
 
 # Changes the value of a mensural note into a cmn note
 
-def change_noterest_to_cmn(noterest):
+def change_noterest_to_cmn(noterest, tie_list):
     print(noterest)
     # 1. Get the information of the figure related to its durational value (i.e., the information encoded in its attributes @dur, @num and @numbase):
 
@@ -273,25 +309,25 @@ def change_noterest_to_cmn(noterest):
     elif value_in_minims == 6:
         dotted_square_note(attribute_dur, noterest)
     elif value_in_minims == 9:
-        dotted_square_note_AND_dotted_whole_note(1, noterest)
+        dotted_square_note_AND_dotted_whole_note(1, noterest, tie_list)
     elif value_in_minims == 8:
-        long_note(1, attribute_dur, noterest)
+        long_note(1, attribute_dur, noterest, tie_list)
     elif value_in_minims == 12:
-        dotted_long_note(1, attribute_dur, noterest)
+        dotted_long_note(1, attribute_dur, noterest, tie_list)
     elif value_in_minims == 18:
-        eighteenth_minims_case(prolatio * tempus, noterest)
+        eighteenth_minims_case(prolatio * tempus, noterest, tie_list)
     elif value_in_minims == 27:
-        dotted_square_note_AND_dotted_whole_note(3, noterest)
+        dotted_square_note_AND_dotted_whole_note(3, noterest, tie_list)
     elif value_in_minims == 16:
-        long_note(2, attribute_dur, noterest)
+        long_note(2, attribute_dur, noterest, tie_list)
     elif value_in_minims == 24:
-        twentyfour_minims_case(prolatio * tempus * modusminor, attribute_dur, noterest)
+        twentyfour_minims_case(prolatio * tempus * modusminor, attribute_dur, noterest, tie_list)
     elif value_in_minims == 36:
-        thirtysix_minims_case(prolatio * tempus * modusminor, prolatio * tempus, attribute_dur, noterest)
+        thirtysix_minims_case(prolatio * tempus * modusminor, prolatio * tempus, attribute_dur, noterest, tie_list)
     elif value_in_minims == 54:
-        fiftyfour_minims_case(prolatio * tempus * modusminor, prolatio * tempus, noterest)
+        fiftyfour_minims_case(prolatio * tempus * modusminor, prolatio * tempus, noterest, tie_list)
     elif value_in_minims == 81:
-        dotted_square_note_AND_dotted_whole_note(9, noterest)
+        dotted_square_note_AND_dotted_whole_note(9, noterest, tie_list)
     # Minims or below
     elif value_in_minims == 1:
         half_note(attribute_dur, noterest)
@@ -331,6 +367,7 @@ if __name__ == "__main__":
     for layer in cmnlayers:
         layer.deleteAllChildren()
 
+    tie_list_piece = []
     # Processing the elements on each staff
     for i in range(0, len(cmnStavesDef)):
         mensural_voice = layers[i]
@@ -346,14 +383,31 @@ if __name__ == "__main__":
         staffdef.removeAttribute('prolatio')
 
         cmn_voice = cmnlayers[i]
+        tie_list_per_voice = []
 
         # Processing each element in the staff
         for child in mensural_voice.getChildren():
             # Processing each note / rest in the staff
             if child.name == "note" or child.name == "rest":
-                change_noterest_to_cmn(child)
+                change_noterest_to_cmn(child, tie_list_per_voice)
             # Other elements are just copied as it
             else:
                 cmn_voice.addChild(child)
+        tie_list_piece.append(tie_list_per_voice)
 
-    documentToFile(cmn_meidoc, args.output_file)
+    # Third MEI document: CMN MEI document with the <measure> element
+    outcmn_meidoc = documentFromFile(args.input_file).getMeiDocument()
+    outcmn_section = outcmn_meidoc.getElementsByName('section')[0]
+    outcmn_section.deleteAllChildren()
+    unique_measure = MeiElement('measure')
+    unique_measure.addAttribute('n', '1')
+    cmnStaves = cmn_meidoc.getElementsByName('staff')
+    for i in range (0, len(cmnStaves)):
+        cmnStaff = cmnStaves[i]
+        unique_measure.addChild(cmnStaff)
+        for tie in tie_list_piece[i]:
+            unique_measure.addChild(tie)
+    outcmn_section.addChild(unique_measure)
+
+
+    documentToFile(outcmn_meidoc, args.output_file)
