@@ -445,19 +445,19 @@ if __name__ == "__main__":
                 notes_in_measure_list.append((note_or_rest, val, False))
                 print(str(val), " < ", str(barlenght_minims))
                 # Update index, find next note, and update acumulator with this next note
+                ind = ind + 1
                 try:
-                    ind = ind + 1
                     note_or_rest = noterests_voice[ind]
-                    print("next note: " + str(note_or_rest))
-                    val = value_in_minims(note_or_rest)
-                    acum = acum + val
-                    print("ACUM: " + str(acum))
                 except:
                     # No more notes (reached the end of the voice)
                     notes_in_measure_per_voice[measure_num] = notes_in_measure_list
                     flag = False
                     break
-            print("acumB: " + str(acum))    
+                print("next note: " + str(note_or_rest))
+                val = value_in_minims(note_or_rest)
+                acum = acum + val
+                print("ACUM: " + str(acum))
+
             # If we have reached the barlength
             if acum == barlenght_minims:
                 print(ind)
@@ -477,7 +477,8 @@ if __name__ == "__main__":
                     flag = False
                 val = value_in_minims(note_or_rest)
                 acum = acum + val
-            # And if we went over the barlength
+            
+            # If we have gone over the barlength
             elif acum > barlenght_minims:
                 print(str(acum), " > ", str(barlenght_minims))
                 print(ind)
@@ -486,9 +487,17 @@ if __name__ == "__main__":
                 val_note1 = barlenght_minims - duration_prior_measure_end
                 val_note2 = val - val_note1
                 print(val, val_note1, val_note2)
-                # Define a new note with the same attributes but a different id
-                # The new id will be related to the original note, but will include a subindex
-                # to indicate that it is one of the many divisions of this note
+                # Define a new note with (almost) the same attributes as the original but with a different ID.
+                # Regarding the Attributes:
+                #  1. All attributes of the original note (except for @dur, which is previously removed) 
+                #     are retrieved to define the two notes in which the original will be divided into.
+                #  2. A new attribute @dur is then added to each individual note.
+                #  This is done so that the @dur attribute of each of the note do not point to the same object;
+                #  otherwise, it will be impossible to give a different duration value to each of the notes 
+                #  in the future (if needed).
+                # Regarding the ID:
+                #  The new ID will be related to the original note, but will include a subindex
+                #  to indicate that it is one of the many divisions of this note.
                 xmlid = note_or_rest.getId()
                 durval = note_or_rest.getAttribute('dur').value
                 note_or_rest.removeAttribute('dur')
@@ -514,6 +523,7 @@ if __name__ == "__main__":
     outcmn_section = outcmn_meidoc.getElementsByName('section')[0]
     outcmn_section.deleteAllChildren()
     
+    # Print the voice_and_measures dictionary that partitions the notes in each voice into measures.
     for item in voices_and_measures.items():
         print(item)
 
@@ -543,13 +553,14 @@ if __name__ == "__main__":
                 note_elements = change_noterest_to_cmn(element, val, tie_list_per_voice)
                 for note in note_elements:
                     cmnLayer.addChild(note)
-                ## triplet_noteinfo[0] = note_elements ## ADDED ##              
+                # If the note is tied to the next, create a <tie> element and find the values for @startid (xmlid1) and @endid (xmlid2).
                 if tied_to_next:
-                    if len(triplet_noteinfo) > 1:
+                    # Find @startid value
+                    if len(note_elements) > 1:
                         xmlid1 = note_elements[-1].getId()
                     else:
                         xmlid1 = notes_info[i][0].getId()
-                    # xmlid2 = notes_info[i+1][0].getId()
+                    # Find @endid value
                     triplet_1stNoteInfo_nextMeasure = voices_and_measures[numvoice][nummeasure+1][0]
                     first_note,  val_1stNote = triplet_1stNoteInfo_nextMeasure[0], triplet_1stNoteInfo_nextMeasure[1]
                     first_note_as_list_of_tied_notes = change_noterest_to_cmn(first_note, val_1stNote, [])
@@ -557,6 +568,7 @@ if __name__ == "__main__":
                         xmlid2 = first_note_as_list_of_tied_notes[0].getId()
                     else:
                         xmlid2 = first_note.getId()
+                    # Create element and assign values to the @startid and @endid pair of attributes.
                     tie = MeiElement('tie')
                     tie.addAttribute('startid', '#' + xmlid1)
                     tie.addAttribute('endid', '#' + xmlid2)
@@ -566,6 +578,5 @@ if __name__ == "__main__":
             # And fill the measure with the ties
             for tie in tie_list_per_voice:
                 measure.addChild(tie)   
-        #####outcmn_section.addChild(measure)
 
     documentToFile(outcmn_meidoc, args.output_file)
