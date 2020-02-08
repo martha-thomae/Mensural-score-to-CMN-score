@@ -555,19 +555,16 @@ if __name__ == "__main__":
                     cmnLayer.addChild(note)
                 # If the note is tied to the next, create a <tie> element and find the values for @startid (xmlid1) and @endid (xmlid2).
                 if tied_to_next:
-                    # Find @startid value
-                    if len(note_elements) > 1:
-                        xmlid1 = note_elements[-1].getId()
-                    else:
-                        xmlid1 = notes_info[i][0].getId()
-                    # Find @endid value
+                    # Find @startid value: the last note of the note_elements list.
+                    xmlid1 = note_elements[-1].getId()
+                    # Find @endid value: the first (CMN) note in the next measure
+                    # (doesn't necessarily coincide with the next mensural note of the next "measure", because this note
+                    # could have been divided into other kinds of types--e.g., in the case of a very long note such as
+                    # a longa that gets translated into dotted long + dotted square notes).
                     triplet_1stNoteInfo_nextMeasure = voices_and_measures[numvoice][nummeasure+1][0]
-                    first_note,  val_1stNote = triplet_1stNoteInfo_nextMeasure[0], triplet_1stNoteInfo_nextMeasure[1]
+                    first_note, val_1stNote = triplet_1stNoteInfo_nextMeasure[0], triplet_1stNoteInfo_nextMeasure[1]
                     first_note_as_list_of_tied_notes = change_noterest_to_cmn(first_note, val_1stNote, [])
-                    if len(first_note_as_list_of_tied_notes) > 1:
-                        xmlid2 = first_note_as_list_of_tied_notes[0].getId()
-                    else:
-                        xmlid2 = first_note.getId()
+                    xmlid2 = first_note_as_list_of_tied_notes[0].getId()
                     # Create element and assign values to the @startid and @endid pair of attributes.
                     tie = MeiElement('tie')
                     tie.addAttribute('startid', '#' + xmlid1)
