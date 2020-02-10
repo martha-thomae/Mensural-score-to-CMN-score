@@ -11,8 +11,14 @@ And the other two are related to the time signature:
 - `unit` corresponds to the beat unit (e.g., '4' for quarter note and '2' for half note).
 
 The parameters are expected to be entered as follows:
-```python
-python mensural_to_cmn.py <input_file> <output_file> count unit
+```
+$ python mensural_to_cmn.py <input_file> <output_file> count unit
+```
+
+## Example
+An example of the performance of the **Mensural MEI Score to CMN MEI Score Translator** is given by the files `Example_mensural.mei` and `Example_CMNed_6-1.mei`. The `Example_mensural.mei` file encodes an excerpt of a piece in mensural notation and score format obtained from the [Measuring Polyphony Project](https://measuringpolyphony.org). The piece from which this excerpt comes from is the motet [Se paour d'umble astinence / Diex, tan desir / \[TENOR\]](https://measuringpolyphony.org/display.html?/assets/mensural/diex_MENSURAL.mei). The following command translates the mensural score encoded in `Example_mensural.mei` into modern values using a 6/1 time signature (i.e., 6 semibreves—whole notes—per measure), and encodes the resulting CMN score into the `Example_CMNed_6-1.mei` file:
+```
+$ python mensural_to_cmn.py Example_mensural.mei Example_CMNed_6-1.mei 6 1
 ```
 
 ## Notes:
